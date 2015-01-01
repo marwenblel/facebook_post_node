@@ -1,0 +1,126 @@
+<?php
+/**
+ * @file facebook_post_node.module
+ *
+ */
+/**
+ * Imlements hook_menu()
+ *
+ */
+function facebook_post_node_menu () {
+    $items = array();
+    $items['admin/config/facebook-post-node'] = array(
+        'title' => t('Facebook post node'),
+        'description' => t('Post nodes on user facebook wall.'),
+        'position' => 'right',
+        'weight' => -5,
+        'page callback' => 'system_admin_menu_block_page',
+        'access arguments' => array('administer site configuration'),
+        'file' => 'system.admin.inc',
+        'file path' => drupal_get_path('module', 'system'),
+    );
+    $items['admin/config/facebook-post-node/settings'] = array(
+        'title' => 'Facebook application settings',
+        'description' => 'Set up your application as appId and secret key.',
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('facebook_post_node_admin_settings'),
+        'access arguments' => array('administer site configuration'),
+        'type' => MENU_NORMAL_ITEM,
+        'file' => 'facebook_post_node.admin.inc',
+    );
+    $items['facebook-post-node/post'] = array(
+        'title' => 'Facebook post node',
+        'page callback' => 'facebook_post_node_callback',
+        'access arguments' => array('access content'),
+        'type' => MENU_CALLBACK,
+    );
+    return $items;
+}
+/**
+ * Implements hook_node_view()
+ *
+ */
+function facebook_post_node_node_view($node, $view_mode, $langcode) {
+
+    // process only on full mode
+    if($view_mode == 'full') {
+
+      // count fields on node
+       foreach($node->content as $key => $value) {
+          if (isset($value['#weight'])) {
+              $last_weight = (int) $value['#weight'];
+          }
+       }
+        $node->content['facebook_post_link'] = array(
+            '#markup' => '<a href="facebook-post-node/post/'.$node->nid.'" target="_blank"> <img src="'.drupal_get_path('module', 'facebook_post_node').'/images/fb_share.png" alt="share on facebook"> </a>',
+            '#weight' => $last_weight + 1,
+        );
+
+
+
+    }
+
+
+    return $node;
+
+
+}
+
+/**
+ *
+ */
+function facebook_post_node_callback ( $nid = 0) {
+    global $base_url;
+    // getting information of the node
+    $node     = node_load($nid);
+    $title    = $node->title;
+    $node_url = $base_url.'/'.drupal_get_path_alias('node/'.$nid);
+    $body     = $node->body['und'][0]['value'];
+
+    // fb app config
+    $appId    = variable_get('facebook_post_node_appId');
+    $secret   = variable_get('facebook_post_node_secret');
+    $facebook = facebook_config($appId, $secret);
+    $user_id = $facebook->getUser();
+
+
+    if ($user_id) {
+
+        try {
+            $ret_obj = $facebook->api('/me/feed', 'POST',
+                array(
+                    'link' => $node_url,
+                    'message' => 'Title: '.$title,
+                ));
+            drupal_goto('http://www.facebook.com');
+        } catch (FacebookApiException $e) {
+            $login_url = $facebook->getLoginUrl( array(
+                'scope' => 'publish_actions'
+            ));
+            echo 'Please <a href="' . $login_url . '">login.</a>';
+            error_log($e->getType());
+            error_log($e->getMessage());
+        }
+    } else {
+        $login_url = $facebook->getLoginUrl( array( 'scope' => 'publish_actions' ) );
+        echo 'Please <a href="' . $login_url . '">login.</a>';
+    }
+
+
+}
+
+/**
+ *
+ */
+function facebook_config ($appId, $secret) {
+    // fb app config
+    require_once 'fb-sdk/facebook.php';
+    $config = array(
+        'appId'  => $appId,
+        'secret' => $secret,
+        'fileUpload' => false, // optional
+        'allowSignedRequest' => false, // optional, but should be set to false for non-canvas apps
+    );
+    $facebook = new Facebook($config);
+    return $facebook;
+}

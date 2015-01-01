@@ -1,0 +1,13 @@
+<?php
+/**
+ * @file facebook_post_node.install
+ * Clear all temporaries variables
+ */
+
+/**
+ * Implements hook_uninstall().
+ */
+function facebook_post_node_uninstall() {
+    variable_del('facebook_post_node_appId');
+    variable_del('facebook_post_node_secret');
+}

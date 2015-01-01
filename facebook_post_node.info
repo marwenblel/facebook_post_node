@@ -1,0 +1,11 @@
+name = Facebook post node
+description = "Facebook post node module allows users to post a node on theirs facebook walls."
+core = 7.x
+package = Custom Modules
+version = 1.0
+
+;files
+files[] = facebook_post_node.module
+files[] = facebook_post_node.install
+files[] = facebook_post_node.admin.inc
+configure = admin/config/content/facebook-post-node/settings
