@@ -41,7 +41,7 @@ function facebook_post_node_menu () {
  *
  */
 function facebook_post_node_node_view($node, $view_mode, $langcode) {
-
+    global $base_url;
     // process only on full mode
     if($view_mode == 'full') {
 
@@ -52,7 +52,7 @@ function facebook_post_node_node_view($node, $view_mode, $langcode) {
           }
        }
         $node->content['facebook_post_link'] = array(
-            '#markup' => '<a href="facebook-post-node/post/'.$node->nid.'" target="_blank"> <img src="'.drupal_get_path('module', 'facebook_post_node').'/images/fb_share.png" alt="share on facebook"> </a>',
+            '#markup' => '<a href="'.$base_url.'/facebook-post-node/post/'.$node->nid.'" target="_blank"> <img src="'.$base_url.'/'.drupal_get_path('module', 'facebook_post_node').'/images/fb_share.png" alt="share on facebook"> </a>',
             '#weight' => $last_weight + 1,
         );
 
@@ -71,6 +71,7 @@ function facebook_post_node_node_view($node, $view_mode, $langcode) {
  */
 function facebook_post_node_callback ( $nid = 0) {
     global $base_url;
+
     // getting information of the node
     $node     = node_load($nid);
     $title    = $node->title;

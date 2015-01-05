@@ -38,12 +38,3 @@ function facebook_post_node_admin_settings() {
     //$form['#submit'][] = 'facebook_post_node_admin_settings_submit';
     return system_settings_form($form);
 }
-/**
- * Process facebook_post_node submission.
- */
-/*function facebook_post_node_admin_settings_submit($form, $form_state) {
-
-    variable_set('facebook_post_node_appId', $form_state['values']['facebook_post_node_settings']['appId']);
-    variable_set('facebook_post_node_secret',  $form_state['values']['facebook_post_node_settings']['secret']);
-    drupal_set_message('Facebook application is set up.');
-}*/
